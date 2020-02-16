@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: scheduled-ebs-snapshots
+    Description: "Create snapshots of EBS volumes, at an interval, with cross-account support."
+    Author: Simon Woldemichael
+    SpdxLicenseId: MIT-0
+    LicenseUrl: LICENSE
+    ReadmeUrl: README.md
+    Labels: ["scheduled", "ebs", "snapshots"]
+    HomePageUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
+
+Parameters:
+  Interval:
+    Type: String
+  FunctionName:
+    Type: String
+    Default: scheduled-ebs-snapshots
+  LambdaRoleArn:
+    Type: String
+  Region:
+    Default: us-east-1
+    Type: String
+  VolumeID:
+    Type: String
+  CrossAccountRoleArn:
+    Type: String
+  CrossAccountRoleExternalID:
+    Type: String
+  
+Resources:
+  ScheduledEBSSnapshots:
+    Description: Lambda handler for scheduled-ebs-snapshots
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Handler: main
+      CodeUri: main.go
+      Runtime: go1.x
+      Tracing: Active
+      MemorySize: 512
+      Environment:
+        Variables:
+          VOLUME_ID: !Ref VolumeID
+          ROLE_ARN: !Ref CrossAccountRoleArn
+          ROLE_EXTERNAL_ID: !Ref CrossAccountRoleExternalID
+      Role: !Ref LambdaRoleArn
+      Timeout: 900
+
+Outputs:
+  LambdaFuntionArn:
+    Description: ScheduledEBSSnapshots Lambda Function ARN
+    Value: !GetAtt ScheduledEBSSnapshots.Arn
