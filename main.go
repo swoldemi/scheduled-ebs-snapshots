@@ -3,25 +3,38 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	log "github.com/sirupsen/logrus"
-	"github.com/swoldemi/lambda-ebs-snapshot/pkg/config"
+	"github.com/swoldemi/scheduled-ebs-snapshots/pkg/config"
 )
 
 var (
 	env *config.Environment
 )
 
-func buildDescription(volumeID string, ts string) string {
-	return fmt.Sprintf("Snapshot of volume %s at %s", volumeID, ts)
+func buildDescription(volumeID string, event events.CloudWatchEvent) (string, error) {
+	dstAcc, err := arn.Parse(os.Getenv("ROLE_ARN"))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf(`
+Snapshot of volume %s at %s. 
+Source account: %s. Destination Account: %s`,
+		volumeID,
+		event.Time.Format(time.RFC1123),
+		event.AccountID,
+		dstAcc.AccountID,
+	), nil
 }
 
 func ec2Provider(sess *session.Session) ec2iface.EC2API {
@@ -38,11 +51,15 @@ func ec2Provider(sess *session.Session) ec2iface.EC2API {
 // 5. In the event of any errors, retry 3 times
 // 6. Respond with the status of the snapshot creation
 func Handler(ctx context.Context, event events.CloudWatchEvent) error {
-	ts := time.Now().Format(time.RFC1123)
-	log.Infof("Received event at %s for volume %s\n", env.VolumeID, ts)
+	log.Infof("Received event at %s for volume %s\n", env.VolumeID, event.Time.Format(time.RFC1123))
 
+	description, err := buildDescription(env.VolumeID, event)
+	if err != nil {
+		log.Errorf("Error constructing description for CreateSnapshotInput: %v\n", err)
+		return err
+	}
 	input := &ec2.CreateSnapshotInput{
-		Description:       aws.String(buildDescription(env.VolumeID, ts)),
+		Description:       aws.String(description),
 		VolumeId:          aws.String(env.VolumeID),
 		TagSpecifications: []*ec2.TagSpecification{},
 	}
@@ -65,7 +82,6 @@ func main() {
 	env, err := config.NewEnvironment(ec2Provider)
 	if err != nil {
 		log.Fatalf("Error while creating new environment: %v\n", err)
-
 		return
 	}
 

@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	log "github.com/sirupsen/logrus"
-	"github.com/swoldemi/lambda-ebs-snapshot/pkg/auth"
+	"github.com/swoldemi/scheduled-ebs-snapshots/pkg/auth"
 )
 
 var (
