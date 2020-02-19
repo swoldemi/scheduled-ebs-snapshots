@@ -3,6 +3,7 @@ package auth
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -26,8 +27,8 @@ var (
 // CrossAccountRole defines the ARN and external ID used to
 // authenticate with a customer's account.
 type CrossAccountRole struct {
-	ARN        string `json:"arn"`
-	ExternalID string `json:"external_id"`
+	ARN        string
+	ExternalID string
 }
 
 // Validate validates a cross account role.
@@ -66,4 +67,35 @@ func AssumeCrossAccountRole(sess *session.Session, role *CrossAccountRole) (*ses
 			SharedConfigState: session.SharedConfigEnable,
 		},
 	)
+}
+
+// AssumeCrossAccountRoleFromEnvironment is a helper for assuming a cross account role
+// using a role and external ID stored within the environment.
+func AssumeCrossAccountRoleFromEnvironment() (*session.Session, error) {
+	region := os.Getenv("REGION")
+	if region == "" {
+		region = "us-east-1"
+	}
+	log.Infof("Assuming role within region: %s\n", region)
+	sess, err := session.NewSessionWithOptions(
+		session.Options{
+			Config: aws.Config{
+				Region: aws.String(region),
+			},
+			SharedConfigState: session.SharedConfigEnable,
+		},
+	)
+	if err != nil {
+		log.Errorf("Error creating base session: %v\n", err)
+		return nil, err
+	}
+	role := &CrossAccountRole{
+		ARN:        os.Getenv("ROLE_ARN"),
+		ExternalID: os.Getenv("ROLE_EXTERNAL_ID"),
+	}
+	if err := role.Validate(); err != nil {
+		log.Errorf("Error while validating role: %v\n", err)
+		return nil, err
+	}
+	return AssumeCrossAccountRole(sess, role)
 }
