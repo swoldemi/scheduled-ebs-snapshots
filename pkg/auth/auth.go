@@ -14,11 +14,8 @@ import (
 )
 
 var (
-	// ErrInvalidRole is returned when the request does not conatin a role.
-	ErrInvalidRole = errors.New("must provide cross account role ARN and external ID")
-
 	// ErrInvalidRoleARN is returned when the request contains a role with no role ARN.
-	ErrInvalidRoleARN = errors.New("must provide cross account role ARN")
+	ErrInvalidRoleARN = errors.New("must provide cross account IAM role ARN")
 
 	// ErrInvalidRoleExternalID is returned when the request contains a role with no external ID.
 	ErrInvalidRoleExternalID = errors.New("must provide cross account role's external ID")
@@ -32,11 +29,13 @@ type CrossAccountRole struct {
 }
 
 // Validate validates a cross account role.
+// Assumes the provided role ARN is not an empty string.
 func (c *CrossAccountRole) Validate() error {
-	if c.ARN == "" {
-		return ErrInvalidRoleARN
+	role, err := arn.Parse(c.ARN)
+	if err != nil {
+		return err
 	}
-	if !arn.IsARN(c.ARN) {
+	if role.Resource != "role" {
 		return ErrInvalidRoleARN
 	}
 	if c.ExternalID == "" {
@@ -48,7 +47,7 @@ func (c *CrossAccountRole) Validate() error {
 // AssumeCrossAccountRole returns a session containing credentials from
 // a cross-account that is assumed.
 func AssumeCrossAccountRole(sess *session.Session, role *CrossAccountRole) (*session.Session, error) {
-	log.Infof("Retrieving credentials for role assumption: %s\n", role.ARN)
+	log.Infof("Retrieving credentials for role assumption with role: %s\n", role.ARN)
 
 	creds := stscreds.NewCredentials(sess, role.ARN, func(p *stscreds.AssumeRoleProvider) {
 		p.Duration = 1 * time.Hour
@@ -69,9 +68,9 @@ func AssumeCrossAccountRole(sess *session.Session, role *CrossAccountRole) (*ses
 	)
 }
 
-// AssumeCrossAccountRoleFromEnvironment is a helper for assuming a cross account role
-// using a role and external ID stored within the environment.
-func AssumeCrossAccountRoleFromEnvironment() (*session.Session, error) {
+// NewSessionFromEnvironment is a helper for creating a session using
+// configuration stored within the environment.
+func NewSessionFromEnvironment() (*session.Session, error) {
 	region := os.Getenv("REGION")
 	if region == "" {
 		region = "us-east-1"
@@ -89,13 +88,17 @@ func AssumeCrossAccountRoleFromEnvironment() (*session.Session, error) {
 		log.Errorf("Error creating base session: %v\n", err)
 		return nil, err
 	}
+
 	role := &CrossAccountRole{
 		ARN:        os.Getenv("ROLE_ARN"),
 		ExternalID: os.Getenv("ROLE_EXTERNAL_ID"),
 	}
-	if err := role.Validate(); err != nil {
-		log.Errorf("Error while validating role: %v\n", err)
-		return nil, err
+	if role.ARN != "" {
+		if err := role.Validate(); err != nil {
+			log.Errorf("Error while validating role: %v\n", err)
+			return nil, err
+		}
+		return AssumeCrossAccountRole(sess, role)
 	}
-	return AssumeCrossAccountRole(sess, role)
+	return sess, nil
 }

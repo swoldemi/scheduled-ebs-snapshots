@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	sess, err := auth.AssumeCrossAccountRoleFromEnvironment()
+	log.Info("Starting Lambda in live environment")
+	sess, err := auth.NewSessionFromEnvironment()
 	if err != nil {
 		log.Fatalf("Error while attempting to assume cross account role: %v\n", err)
 		return
