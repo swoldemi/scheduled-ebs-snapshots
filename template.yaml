@@ -9,7 +9,7 @@ Metadata:
     SpdxLicenseId: MIT-0
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
-    Labels: ["scheduled", "ebs", "snapshots"]
+    Labels: ["scheduled", "ebs", "snapshots", "cross-account"]
     HomePageUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
     SemanticVersion: 1.0.0
     SourceCodeUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
@@ -17,41 +17,86 @@ Metadata:
 Parameters:
   Interval:
     Type: String
-  FunctionName:
-    Type: String
-    Default: scheduled-ebs-snapshots
-  LambdaRoleArn:
-    Type: String
+    Description: "Required. How often should the snapshot be taken? Must be a valid CloudFormation Rate Expression: https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduled-events.html"
   Region:
-    Default: us-east-1
     Type: String
+    Description: Required. The region in which the EBS volume to take a snapshot of exists.
   VolumeID:
     Type: String
+    Description: Optional. The ID of the EBS volume to take a snapshot of. Defaults to us-east-1
+    Default: us-east-1
   CrossAccountRoleArn:
     Type: String
+    Description: Optional. The ARN of the cross-account role where the EBS volume exists.
   CrossAccountRoleExternalID:
     Type: String
-  
+    Description: Optional. The external ID associated with the cross-account role.
+
 Resources:
-  ScheduledEBSSnapshots:
-    Description: Lambda handler for scheduled-ebs-snapshots
-    Type: AWS::Serverless::Function
+  ScheduledEBSSnapshotsExecutionRole:
+    Type: AWS::IAM::Role
     Properties:
-      FunctionName: !Ref FunctionName
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                  - ec2:DeleteSnapshot
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeSnapshots
+                  - ec2:DescribeTags
+                  - ec2:DescribeVolumeAttribute
+                  - ec2:DescribeVolumeStatus
+                  - ec2:DescribeVolumes
+                Effect: Allow
+                Resource: "*"
+            Version: "2012-10-17"
+          PolicyName: ScheduledEBSSnapshotsLambdaPolicy
+
+  ScheduledEBSSnapshotsFunction:
+    Type: AWS::Serverless::Function
+    Description: Lambda handler for scheduled-ebs-snapshots
+    Properties:
+      FunctionName: scheduled-ebs-snapshots
       Handler: main
-      CodeUri: main.go
       Runtime: go1.x
       Tracing: Active
-      MemorySize: 512
+      MemorySize: 128
       Environment:
         Variables:
           VOLUME_ID: !Ref VolumeID
           ROLE_ARN: !Ref CrossAccountRoleArn
           ROLE_EXTERNAL_ID: !Ref CrossAccountRoleExternalID
-      Role: !Ref LambdaRoleArn
-      Timeout: 900
+          REGION: !Ref Region
+      Role: !GetAtt ScheduledEBSSnapshotsExecutionRole.Arn
+      Timeout: 15
 
+  ScheduledEBSSnapshotsFunctionEvent:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: CloudWatch scheduled event to invoke the scheduled-ebs-snapshots Lambda function
+      ScheduleExpression:
+        {
+          "Fn::Sub":
+            ["rate(${Interval})", { "Interval": { "Ref": "Interval" } }],
+        }
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt ScheduledEBSSnapshotsFunction.Arn
+          Id: ScheduledEBSSnapshotsFunctionEvent
 Outputs:
-  LambdaFuntionArn:
+  LambdaFunctionArn:
     Description: ScheduledEBSSnapshots Lambda Function ARN
-    Value: !GetAtt ScheduledEBSSnapshots.Arn
+    Value: !GetAtt ScheduledEBSSnapshotsFunction.Arn
