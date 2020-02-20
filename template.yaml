@@ -28,9 +28,20 @@ Parameters:
   CrossAccountRoleArn:
     Type: String
     Description: Optional. The ARN of the cross-account role where the EBS volume exists.
+    Default: ""
   CrossAccountRoleExternalID:
     Type: String
     Description: Optional. The external ID associated with the cross-account role.
+    Default: ""
+
+Conditions:
+  HasRoleArn:
+    { "Fn::Not": [{ "Fn::Equals": ["", { "Ref": "CrossAccountRoleArn" }] }] }
+  HasRoleExternalID:
+    {
+      "Fn::Not":
+        [{ "Fn::Equals": ["", { "Ref": "CrossAccountRoleExternalID" }] }],
+    }
 
 Resources:
   ScheduledEBSSnapshotsExecutionRole:
@@ -51,6 +62,7 @@ Resources:
         - PolicyDocument:
             Statement:
               - Action:
+                  - xray:PutTraceSegments
                   - ec2:CreateSnapshot
                 Effect: Allow
                 Resource: "*"
@@ -69,8 +81,24 @@ Resources:
       Environment:
         Variables:
           VOLUME_ID: !Ref VolumeID
-          ROLE_ARN: !Ref CrossAccountRoleArn
-          ROLE_EXTERNAL_ID: !Ref CrossAccountRoleExternalID
+          ROLE_ARN:
+            {
+              "Fn::If":
+                [
+                  "HasRoleArn",
+                  { "Ref": "CrossAccountRoleArn" },
+                  { "Ref": "AWS::NoValue" },
+                ],
+            }
+          ROLE_EXTERNAL_ID:
+            {
+              "Fn::If":
+                [
+                  "HasRoleExternalID",
+                  { "Ref": "CrossAccountRoleExternalID" },
+                  { "Ref": "AWS::NoValue" },
+                ],
+            }
           REGION: !Ref Region
       Role: !GetAtt ScheduledEBSSnapshotsExecutionRole.Arn
       Timeout: 15
@@ -88,6 +116,15 @@ Resources:
       Targets:
         - Arn: !GetAtt ScheduledEBSSnapshotsFunction.Arn
           Id: ScheduledEBSSnapshotsFunctionEvent
+
+  ScheduledEBSSnapshotsFunctionEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:  !GetAtt ScheduledEBSSnapshotsFunction.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ScheduledEBSSnapshotsFunctionEvent.Arn
+
 Outputs:
   LambdaFunctionArn:
     Description: ScheduledEBSSnapshots Lambda Function ARN
