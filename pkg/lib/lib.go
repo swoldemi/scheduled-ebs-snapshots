@@ -77,7 +77,6 @@ type Handler func(context.Context, events.CloudWatchEvent) error
 
 // FunctionContainer contains the business logic for the scheduled-ebs-snapshots Lambda function.
 func FunctionContainer(svc ec2iface.EC2API) (Handler, error) {
-	log.Info("Starting Lambda in live environment")
 	volumeID := os.Getenv("VOLUME_ID")
 	if volumeID == "" {
 		log.Error(ErrInvalidVolumeID)
