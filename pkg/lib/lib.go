@@ -60,15 +60,25 @@ func InvokeSnapshot(ctx context.Context, description, volumeID string, svc ec2if
 // FormatSnapshotDescription formats the description for an EBS volume snapshot,
 // using the ID of the volume and the CloudWatch event that triggered the snapshot.
 func FormatSnapshotDescription(volumeID string, event events.CloudWatchEvent) (string, error) {
-	dstAcc, err := arn.Parse(os.Getenv("ROLE_ARN"))
-	if err != nil {
-		return "", err
+	var dstAcc string
+
+	role := os.Getenv("ROLE_ARN")
+	switch role {
+	case "":
+		dstAcc = event.AccountID
+	default:
+		r, err := arn.Parse(role)
+		if err != nil {
+			return "", err
+		}
+		dstAcc = r.AccountID
 	}
+
 	return fmt.Sprintf(`Snapshot of volume %s at %s. Source account: %s. Destination Account: %s`,
 		volumeID,
 		event.Time.Format(time.RFC1123),
 		event.AccountID,
-		dstAcc.AccountID,
+		dstAcc,
 	), nil
 }
 
@@ -88,7 +98,7 @@ func FunctionContainer(svc ec2iface.EC2API) (Handler, error) {
 	}
 
 	return func(ctx context.Context, event events.CloudWatchEvent) error {
-		log.Infof("Received event at %s for volume %s\n", volumeID, event.Time.Format(time.RFC1123))
+		log.Infof("Received event at %s for volume %s\n", event.Time.Format(time.RFC1123), volumeID)
 
 		description, err := FormatSnapshotDescription(volumeID, event)
 		if err != nil {
