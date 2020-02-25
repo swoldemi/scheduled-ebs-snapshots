@@ -84,6 +84,11 @@ redeploy: check tmpl test build sam-package sam-deploy
 destroy: clean
 	aws --region $(DEFAULT_REGION) cloudformation delete-stack --stack-name $(DEFAULT_STACK_NAME)
 
+.PHONY: update-mod
+update-mod:
+	go get $(go list -f "{{if not (or .Main .Indirect)}}{{.Path}}{{end}}" -m all)
+	go mod tidy
+
 .PHONY: clean
 clean:
 	rm -f main packaged.yaml profile.
