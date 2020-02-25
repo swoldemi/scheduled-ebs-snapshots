@@ -1,0 +1,32 @@
+version: 0.2
+env:
+  variables:
+    GOPATH: /go
+    GOBIN: /go/bin
+    ROOTPATH: /go/src/github.com/swoldemi/scheduled-ebs-snapshots
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.14
+    commands:
+      - mkdir -p $ROOTPATH
+      - ln -s "${CODEBUILD_SRC_DIR}" $ROOTPATH
+      - go get golang.org/x/lint/golint
+      - go get golang.org/x/tools/cmd/goimports
+      - curl -L https://git.io/vp6lP | bash -s -- -b /go/bin
+      - go get github.com/golangci/golangci-lint/cmd/golangci-lint
+      - go get github.com/gojp/goreportcard/cmd/goreportcard-cli
+      - go mod tidy && go mod download
+
+  pre_build:
+    commands:
+      - make check test
+
+  build:
+    commands:
+      - make build sam-package
+
+  post_build:
+    commands:
+      - make sam-publish
