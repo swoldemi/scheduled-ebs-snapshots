@@ -86,7 +86,7 @@ destroy: clean
 
 .PHONY: update-mod
 update-mod:
-	go get $(go list -f "{{if not (or .Main .Indirect)}}{{.Path}}{{end}}" -m all)
+	go get $(shell go list -f "{{if not (or .Main .Indirect)}}{{.Path}}{{end}}" -m all)
 	go mod tidy
 
 .PHONY: clean
