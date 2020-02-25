@@ -2,6 +2,20 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
 Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Required Lambda Function Configuration"
+        Parameters:
+          - Interval
+          - IntervalUnit
+          - Region
+      - Label:
+          default: "Optional Parameters"
+        Parameters:
+          - CrossAccountRoleArn
+          - CrossAccountRoleExternalID
+
   AWS::ServerlessRepo::Application:
     Name: scheduled-ebs-snapshots
     Description: "Create snapshots of EBS volumes, at an interval, with cross-account support."
@@ -17,7 +31,11 @@ Metadata:
 Parameters:
   Interval:
     Type: String
-    Description: "Required. How often should the snapshot be taken? Must be a valid CloudFormation Rate Expression: https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduled-events.html"
+    Description: Required. How often should the snapshot be taken?
+  IntervalUnit:
+    Type: String
+    Description: "Required. Using what unit of time will the snapshot be taken?"
+    AllowedValues: ["minute", "minutes", "hour", "hours", "day", "days"]
   Region:
     Type: String
     Description: Required. The region in which the EBS volume to take a snapshot of exists.
@@ -62,8 +80,10 @@ Resources:
         - PolicyDocument:
             Statement:
               - Action:
-                  - xray:PutTraceSegments
                   - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                  - cloudwatch:PutMetricData
+                  - xray:PutTraceSegments
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
@@ -107,11 +127,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: CloudWatch scheduled event to invoke the scheduled-ebs-snapshots Lambda function
-      ScheduleExpression:
-        {
-          "Fn::Sub":
-            ["rate(${Interval})", { "Interval": { "Ref": "Interval" } }],
-        }
+      ScheduleExpression: !Sub rate(${Interval} ${IntervalUnit})
       State: ENABLED
       Targets:
         - Arn: !GetAtt ScheduledEBSSnapshotsFunction.Arn
@@ -121,7 +137,7 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName:  !GetAtt ScheduledEBSSnapshotsFunction.Arn
+      FunctionName: !GetAtt ScheduledEBSSnapshotsFunction.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt ScheduledEBSSnapshotsFunctionEvent.Arn
 
