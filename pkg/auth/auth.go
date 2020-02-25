@@ -75,7 +75,7 @@ func NewSessionFromEnvironment() (*session.Session, error) {
 	if region == "" {
 		region = "us-east-1"
 	}
-	log.Infof("Assuming role within region: %s\n", region)
+	log.Infof("Creating session within region: %s\n", region)
 	sess, err := session.NewSessionWithOptions(
 		session.Options{
 			Config: aws.Config{
