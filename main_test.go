@@ -10,6 +10,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/aws/aws-sdk-go/service/cloudwatch/cloudwatchiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	log "github.com/sirupsen/logrus"
@@ -22,6 +24,11 @@ type mockEC2Client struct {
 	ec2iface.EC2API
 }
 
+type mockCWClient struct {
+	mock.Mock
+	cloudwatchiface.CloudWatchAPI
+}
+
 // CreateSnapshot mocks the CreateSnapshot EC2 API endpoint.
 func (_m *mockEC2Client) CreateSnapshotWithContext(ctx aws.Context, input *ec2.CreateSnapshotInput, opts ...request.Option) (*ec2.Snapshot, error) {
 	log.Debugf("Mocking CreateSnapshot API for volume: %s\n", *input.VolumeId)
@@ -29,8 +36,15 @@ func (_m *mockEC2Client) CreateSnapshotWithContext(ctx aws.Context, input *ec2.C
 	return args.Get(0).(*ec2.Snapshot), args.Error(1)
 }
 
-func testHandlerWithEvent(svc ec2iface.EC2API, event events.CloudWatchEvent) error {
-	h, err := lib.FunctionContainer(svc)
+// CreateSnapshot mocks the PutMetricData CloudWatch API endpoint.
+func (_m *mockCWClient) PutMetricDataWithContext(ctx aws.Context, input *cloudwatch.PutMetricDataInput, opts ...request.Option) (*cloudwatch.PutMetricDataOutput, error) {
+	log.Debugf("Mocking PutMetricData API with input: %s\n", input.String())
+	args := _m.Called(ctx, input)
+	return args.Get(0).(*cloudwatch.PutMetricDataOutput), args.Error(1)
+}
+
+func testHandlerWithEvent(f *lib.FunctionContainer, event events.CloudWatchEvent) error {
+	h, err := f.GetHandler()
 	if err != nil {
 		return err
 	}
@@ -40,19 +54,19 @@ func testHandlerWithEvent(svc ec2iface.EC2API, event events.CloudWatchEvent) err
 	return nil
 }
 
-func TestHandler(t *testing.T) {
-	defaultEvent := events.CloudWatchEvent{
-		Version:    "0",
-		ID:         "89d1a02d-5ec7-412e-82f5-13505f849b41",
-		DetailType: "Scheduled Event",
-		Source:     "aws.events",
-		AccountID:  "123456789012",
-		Time:       time.Now(),
-		Region:     "us-east-1",
-		Resources:  []string{"arn:aws:events:us-east-1:123456789012:rule/SampleRule"},
-		Detail:     json.RawMessage{},
-	}
+var defaultEvent = events.CloudWatchEvent{
+	Version:    "0",
+	ID:         "89d1a02d-5ec7-412e-82f5-13505f849b41",
+	DetailType: "Scheduled Event",
+	Source:     "aws.events",
+	AccountID:  "123456789012",
+	Time:       time.Now(),
+	Region:     "us-east-1",
+	Resources:  []string{"arn:aws:events:us-east-1:123456789012:rule/SampleRule"},
+	Detail:     json.RawMessage{},
+}
 
+func TestHandler(t *testing.T) {
 	if err := os.Setenv("VOLUME_ID", "vol-test"); err != nil {
 		t.Fatalf("Error setting VOLUME_ID environment variable: %v\n", err)
 	}
@@ -64,43 +78,23 @@ func TestHandler(t *testing.T) {
 	}
 
 	volumeID := os.Getenv("VOLUME_ID")
-	description, err := lib.FormatSnapshotDescription(volumeID, defaultEvent)
+	description, err := lib.NewSnapshotDescription(volumeID, defaultEvent)
 	if err != nil {
 		t.Fatalf("Error formatting snapshot description: %v\n", err)
-
-	}
-	defaultInput := &ec2.CreateSnapshotInput{
-		Description: aws.String(description),
-		TagSpecifications: []*ec2.TagSpecification{
-			{
-				ResourceType: aws.String("snapshot"),
-				Tags: []*ec2.Tag{
-					{
-						Key:   aws.String("timestamp"),
-						Value: aws.String(time.Now().UTC().Format(time.RFC1123)),
-					},
-				},
-			}},
-		VolumeId: aws.String(volumeID),
 	}
 
-	m := new(mockEC2Client)
-	m.On("CreateSnapshotWithContext", context.Background(), defaultInput).
+	ec2Svc := new(mockEC2Client)
+	ec2Svc.On("CreateSnapshotWithContext", context.Background(), description.CreateSnapshotInput()).
 		Return(&ec2.Snapshot{}, nil)
 
-	tests := []struct {
-		name    string
-		event   events.CloudWatchEvent
-		wantErr bool
-	}{
-		{"SuccessfulInvocation", defaultEvent, false},
+	cwSvc := new(mockCWClient)
+	cwSvc.On("PutMetricDataWithContext", context.Background(), description.PutMetricDataInput()).
+		Return(&cloudwatch.PutMetricDataOutput{}, nil)
+
+	f := lib.NewFunctionContainer(ec2Svc, cwSvc, lib.Development)
+	if err := testHandlerWithEvent(f, defaultEvent); err != nil {
+		t.Fatalf("testHandlerWithEvent() error = %v\n", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := testHandlerWithEvent(m, tt.event); (err != nil) != tt.wantErr {
-				t.Errorf("testHandlerWithEvent() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			m.AssertExpectations(t)
-		})
-	}
+	ec2Svc.AssertExpectations(t)
+	cwSvc.AssertExpectations(t)
 }
