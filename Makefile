@@ -14,12 +14,16 @@ GOREPORTCARDCLI := $(GOBIN)/goreportcard-cli
 GOMETALINTER := $(GOBIN)/gometalinter
 
 # Rules for tooling binaries
+.PHONY: $(GOIMPORTS)
 $(GOIMPORTS):
 	go install golang.org/x/tools/cmd/goimports
+.PHONY: $(GOLANGCILINT)
 $(GOLANGCILINT):
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+.PHONY: $(GOREPORTCARDCLI)
 $(GOREPORTCARDCLI):
 	go install github.com/gojp/goreportcard/cmd/goreportcard-cli
+.PHONY: $(GOMETALINTER)
 $(GOMETALINTER):
 	curl -L https://git.io/vp6lP | bash -s -- -b $(GOBIN)
 
@@ -96,3 +100,12 @@ update-mod:
 .PHONY: clean
 clean:
 	rm -f main packaged.yaml profile.out
+
+
+.PHONY: public
+public:
+	# Use this to make your SAR application public to all AWS accounts
+	aws serverlessrepo put-application-policy \
+		--region us-east-1 \
+		--application-id application-arn \
+		--statements Principals=*-id,Actions=Deploy
