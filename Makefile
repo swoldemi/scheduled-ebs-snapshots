@@ -1,8 +1,8 @@
 S3_BUCKET ?= swoldemi-tmp
 DEFAULT_VOLUME_ID ?= vol-0b820eaeab56561d7
 DEFAULT_REGION ?= us-east-2
-DEFAULT_INTERVAL="1"
-DEFAULT_INTERVAL_UNIT="minute"
+DEFAULT_INTERVAL ?= 1
+DEFAULT_INTERVAL_UNIT ?= minute
 DEFAULT_CROSS_ACCOUNT_ROLE_ARN ?= arn:aws:iam::273450712882:role/SampleRole
 DEFAULT_CROSS_ACCOUNT_ROLE_EXTERNAL_ID ?= SampleExternalID
 DEFAULT_STACK_NAME ?= lambda-scheduled-ebs-snapshots
@@ -33,7 +33,7 @@ test: clean
 
 # Static code analysis tooling and checks
 .PHONY: check
-check: setup
+check:
 	goimports -w -l -e .
 	gofmt -s -w .
 	golangci-lint run ./... \
