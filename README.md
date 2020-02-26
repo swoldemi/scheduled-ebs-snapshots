@@ -6,7 +6,7 @@
 [sar-logo]: https://img.shields.io/badge/Serverless%20Application%20Repository-View-FF9900?logo=amazon%20aws&style=flat-square
 
 # scheduled-ebs-snapshots
->Create snapshots of Amazon Elastic Block Storage volumes, with cross-account support.
+>Create snapshots of Amazon Elastic Block Storage volumes, with cross-account support
 
 This AWS Serverless Application Repository application aims to solve some of the limitations present in Amazon Data Lifecycle Manager, related to managing the lifecycle of EBS volumes and their snapshots.
 
@@ -94,6 +94,16 @@ After your specified interval and interval unit (example: 5 minutes), a CloudWat
 ## Contributing
 Have an idea for a feature to enhance this serverless application? Open an [issue](https://github.com/swoldemi/scheduled-ebs-snapshots/issues) or [pull request](https://github.com/swoldemi/scheduled-ebs-snapshots/pulls)!
 
+### Screenshots
+>Example response latency percentiles as reported by X-Ray traces after ~200 events.
+![example-trace-response-time](./screenshots/example-trace-response-time.PNG)
+
+>Example CloudWatch Service Map Dashboard for this Lambda function.
+![service-map-dashboard](./screenshots/service-map-dashboard.PNG)
+
+>Custom cloudwatch metric reporting the Snapshot count with dimensions for where they came from and where they went.
+![example-metrics-screenshot](./screenshots/example-metrics-screenshot.PNG)
+
 ### Development
 This application has been developed, built, and testing against [Go 1.13, Go 1.14](https://golang.org/dl/), the latest version of the [Serverless Application Model CLI](https://github.com/awslabs/aws-sam-cli), and the latest version of the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html). A [Makefile](./Makefile) has been provided for convenience.
 
@@ -108,7 +118,7 @@ make destroy
 ```
 
 ## To Do
-1. Account for the default 100,000 EBS snapshot quota
+1. Account for the default 100,000 EBS snapshot quota.
 2. Backoff strategies for large volume snapshots to account for the limit on the number of concurrently active `pending` snapshots.
     - Answer: What does the distribution look like, given a certain interval?
     - Answer: Is it worth cleaning up snapshots, given new snapshots are incremental/successive?
@@ -116,17 +126,6 @@ make destroy
 
 ## References
 Automating the Amazon EBS Snapshot Lifecycle: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html
-
-
-## Screenshots
->Example response latency percentiles as reported by X-Ray traces after ~200 events.
-![example-trace-response-time](./screenshots/example-trace-response-time.PNG)
-
->Example CloudWatch Service Map Dashboard for this Lambda function.
-![service-map-dashboard](./screenshots/service-map-dashboard.PNG)
-
->Custom cloudwatch metric reporting the Snapshot count with dimensions for where they came from and where they went.
-![example-metrics-screenshot](./screenshots/example-metrics-screenshot.PNG)
 
 ## License
 [MIT No Attribution (MIT-0)](https://spdx.org/licenses/MIT-0.html)
