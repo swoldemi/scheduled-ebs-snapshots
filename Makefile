@@ -95,4 +95,4 @@ update-mod:
 
 .PHONY: clean
 clean:
-	rm -f main packaged.yaml profile.
+	rm -f main packaged.yaml profile.out

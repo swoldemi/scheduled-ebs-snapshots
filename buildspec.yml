@@ -10,7 +10,7 @@ phases:
     runtime-versions:
       golang: 1.13
     commands:
-      - pip install aws-sam-cli
+      - pip install aws-sam-cli cfn-lint
       - sed -i '3s/go 1.14/go 1.13/' go.mod # Until CodeBuild supports Go 1.14
       - mkdir -p $ROOTPATH
       - ln -s "${CODEBUILD_SRC_DIR}" $ROOTPATH
@@ -23,7 +23,7 @@ phases:
 
   pre_build:
     commands:
-      - make check test
+      - make tmpl check test
 
   build:
     commands:
