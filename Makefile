@@ -69,6 +69,10 @@ sam-deploy:
 	--capabilities CAPABILITY_IAM
 	aws --region $(DEFAULT_REGION) cloudformation describe-stacks --stack-name $(DEFAULT_STACK_NAME) --query 'Stacks[0].Outputs'
 
+.PHONY: sam-publish
+sam-publish:
+		sam publish --region us-east-1 --template packaged.yaml
+
 .PHONY: stack-describe 
 stack-describe:
 	aws --region $(DEFAULT_REGION) cloudformation describe-stacks --stack-name $(DEFAULT_STACK_NAME) --query 'Stacks[0].Outputs'
