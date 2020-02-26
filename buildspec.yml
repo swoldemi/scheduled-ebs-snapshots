@@ -13,13 +13,13 @@ phases:
       - pip install aws-sam-cli cfn-lint
       - sed -i '3s/go 1.14/go 1.13/' go.mod # Until CodeBuild supports Go 1.14
       - mkdir -p $ROOTPATH
-      - ln -s "${CODEBUILD_SRC_DIR}" $ROOTPATH
       - go get golang.org/x/lint/golint
       - go get golang.org/x/tools/cmd/goimports
       - curl -L https://git.io/vp6lP | bash -s -- -b /go/bin
       - go get github.com/golangci/golangci-lint/cmd/golangci-lint
       - go get github.com/gojp/goreportcard/cmd/goreportcard-cli
       - go mod tidy && go mod download
+      - ln -s "${CODEBUILD_SRC_DIR}" $ROOTPATH
 
   pre_build:
     commands:
