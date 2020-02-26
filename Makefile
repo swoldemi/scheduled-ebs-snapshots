@@ -1,3 +1,6 @@
+all : tmpl check build sam-package sam-deploy sam-tail-logs
+.PHONY : all
+
 S3_BUCKET ?= swoldemi-tmp
 DEFAULT_VOLUME_ID ?= vol-0b820eaeab56561d7
 DEFAULT_REGION ?= us-east-2
@@ -62,11 +65,11 @@ tmpl:
 
 .PHONY: sam-package
 sam-package:
-	@sam package --template-file template.yaml --s3-bucket $(S3_BUCKET) --output-template-file packaged.yaml
+	sam package --template-file template.yaml --s3-bucket $(S3_BUCKET) --output-template-file packaged.yaml
 
 .PHONY: sam-deploy
 sam-deploy:
-	@sam deploy \
+	sam deploy \
 	--parameter-overrides Interval=$(DEFAULT_INTERVAL) IntervalUnit=$(DEFAULT_INTERVAL_UNIT) Region=$(DEFAULT_REGION) VolumeID=$(DEFAULT_VOLUME_ID)  \
 	--template-file ./packaged.yaml \
 	--stack-name $(DEFAULT_STACK_NAME) \
@@ -83,17 +86,14 @@ stack-describe:
 
 .PHONY: sam-tail-logs
 sam-tail-logs:
-	@sam logs --name scheduled-ebs-snapshots --tail
-
-.PHONY: redeploy
-redeploy: check tmpl test build sam-package sam-deploy
+	sam logs --name scheduled-ebs-snapshots --tail
 
 .PHONY: destroy
 destroy: clean
 	aws --region $(DEFAULT_REGION) cloudformation delete-stack --stack-name $(DEFAULT_STACK_NAME)
 
-.PHONY: update-mod
-update-mod:
+.PHONY: update
+update:
 	go get $(shell go list -f "{{if not (or .Main .Indirect)}}{{.Path}}{{end}}" -m all)
 	go mod tidy
 
