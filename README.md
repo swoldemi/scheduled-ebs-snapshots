@@ -20,8 +20,12 @@ Prerequisites:
 1. An EBS volume to be snapshotted.
 
 ### Deploying the Lambda
-It is recommended that you deploy this Lambda function directly from the AWS Serverless Application Repository. It is also possible to deploy the function using the [SAM CLI](https://aws.amazon.com/serverless/sam/) or through CloudFormation via the [AWS CLI](https://aws.amazon.com/cli/). 
+It is recommended that you deploy this Lambda function directly from the AWS Serverless Application Repository. It is also possible to deploy this function using:
+- The [SAM CLI](https://aws.amazon.com/serverless/sam/)
+- CloudFormation via the [AWS CLI](https://aws.amazon.com/cli/)
+- CloudFormation via the [CloudFormation management console](https://aws.amazon.com/cloudformation/)
 
+To deploy this function from AWS GovCloud or regions in China, you must have an account with access to these regions.
 
 |Region                                        |Click and Deploy                                                                                                                                 |
 |----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -80,6 +84,8 @@ Click [here](https://console.aws.amazon.com/iam/home?region=us-east-1#/roles$new
 
 If the volume exists within the same account as the Lambda function, then the `CrossAccountRoleArn` and `CrossAccountRoleExternalID` can be left empty. 
 
+Note: The Lambda function creates an Execution Role which also grants itself `xray:PutTraceSegments` and `cloudwatch:PutMetricData`.
+
 ## Contributing
 Have an idea for a feature to enhance this serverless application? Open an [issue](https://github.com/swoldemi/scheduled-ebs-snapshots/issues) or [pull request](https://github.com/swoldemi/scheduled-ebs-snapshots/pulls)!
 
@@ -97,7 +103,7 @@ make destroy
 ```
 
 ## To Do
-1. Account for the 100,000 EBS snapshot quota
+1. Account for the default 100,000 EBS snapshot quota
 2. Backoff strategies for large volume snapshots to account for the limit on the number of concurrently active `pending` snapshots.
     - Answer: What does the distribution look like, given a certain interval?
     - Answer: Is it worth cleaning up snapshots, given new snapshots are incremental/successive?
@@ -108,13 +114,13 @@ Automating the Amazon EBS Snapshot Lifecycle: https://docs.aws.amazon.com/AWSEC2
 
 
 ## Screenshots
->Example latency percentiles as reported by X-Ray traces after ~200 events
+>Example response latency percentiles as reported by X-Ray traces after ~200 events.
 ![example-trace-response-time](./screenshots/example-trace-response-time.PNG)
 
->Example CloudWatch Service Map Dashboard for the Lambda
+>Example CloudWatch Service Map Dashboard for this Lambda function.
 ![service-map-dashboard](./screenshots/service-map-dashboard.PNG)
 
->Custom cloudwatch metric reporting Snapshot count with dimensions for where they came from and where they went
+>Custom cloudwatch metric reporting the Snapshot count with dimensions for where they came from and where they went.
 ![example-metrics-screenshot](./screenshots/example-metrics-screenshot.PNG)
 
 ## License
