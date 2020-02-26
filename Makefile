@@ -85,10 +85,10 @@ clean:
 	rm -f main packaged.yaml profile.out
 
 
-.PHONY: public
-public:
+.PHONY: sar-public
+sar-public:
 	# Use this to make your SAR application public to all AWS accounts
 	aws serverlessrepo put-application-policy \
 		--region us-east-1 \
-		--application-id application-arn \
-		--statements Principals=*-id,Actions=Deploy
+		--application-id arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots \
+		--statements Principals=*,Actions=Deploy
