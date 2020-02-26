@@ -8,8 +8,9 @@ env:
 phases:
   install:
     runtime-versions:
-      golang: 1.14
+      golang: 1.13
     commands:
+      - sed -i '3s/go 1.14/go 1.13/' go.mod # Until CodeBuild supports Go 1.14
       - mkdir -p $ROOTPATH
       - ln -s "${CODEBUILD_SRC_DIR}" $ROOTPATH
       - go get golang.org/x/lint/golint
