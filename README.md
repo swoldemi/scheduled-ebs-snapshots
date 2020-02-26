@@ -1,4 +1,6 @@
+![](https://codebuild.us-east-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiYTJIcFJ2d1NiNnNTYUs4VEFGNVlQbzhOdXF1aWcrdHhKdXVwR2h5SjRONVBDMmtnRXFlRmF5NFAwN1dIdUFGcWc1RHlOSjMra3YvZFlqeGNZbSszSVlzPSIsIml2UGFyYW1ldGVyU3BlYyI6InhDL1JTOW9wWC9QWUw0ZDAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 [![][sar-logo]](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:273450712882:applications~scheduled-ebs-snapshots)
+
 
 [sar-deploy]: https://img.shields.io/badge/Serverless%20Application%20Repository-Deploy%20Now-FF9900?logo=amazon%20aws&style=flat-square
 [sar-logo]: https://img.shields.io/badge/Serverless%20Application%20Repository-View-FF9900?logo=amazon%20aws&style=flat-square
@@ -17,7 +19,7 @@ This AWS Serverless Application Repository application aims to solve some of the
 
 ## Usage
 Prerequisites:
-1. An EBS volume to be snapshotted.
+1. An Amazon Elastic Block Storage volume to be snapshotted.
 
 ### Deploying the Lambda
 It is recommended that you deploy this Lambda function directly from the AWS Serverless Application Repository. It is also possible to deploy this function using:
@@ -86,11 +88,14 @@ If the volume exists within the same account as the Lambda function, then the `C
 
 Note: The Lambda function creates an Execution Role which also grants itself `xray:PutTraceSegments` and `cloudwatch:PutMetricData`.
 
+### Test that it works
+After your specified interval and interval unit (example: 5 minutes), a CloudWatch event will trigger the Lambda function and create a snapshot of the volume you specified. 
+
 ## Contributing
 Have an idea for a feature to enhance this serverless application? Open an [issue](https://github.com/swoldemi/scheduled-ebs-snapshots/issues) or [pull request](https://github.com/swoldemi/scheduled-ebs-snapshots/pulls)!
 
 ### Development
-This application has been built and testing against [Go 1.13](https://golang.org/dl/) and the latest version of the [Serverless Application Model CLI](https://github.com/awslabs/aws-sam-cli)
+This application has been developed, built, and testing against [Go 1.13, Go 1.14](https://golang.org/dl/), the latest version of the [Serverless Application Model CLI](https://github.com/awslabs/aws-sam-cli), and the latest version of the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html). A [Makefile](./Makefile) has been provided for convenience.
 
 ```
 make check
