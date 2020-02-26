@@ -1,5 +1,5 @@
 all : tmpl check build sam-package sam-deploy sam-tail-logs
-.PHONY : all
+.PHONY: all
 
 S3_BUCKET ?= swoldemi-tmp
 DEFAULT_VOLUME_ID ?= vol-0b820eaeab56561d7
@@ -15,20 +15,6 @@ GOIMPORTS := $(GOBIN)/goimports
 GOLANGCILINT := $(GOBIN)/golangci-lint
 GOREPORTCARDCLI := $(GOBIN)/goreportcard-cli
 GOMETALINTER := $(GOBIN)/gometalinter
-
-# Rules for tooling binaries
-.PHONY: $(GOIMPORTS)
-$(GOIMPORTS):
-	go install golang.org/x/tools/cmd/goimports
-.PHONY: $(GOLANGCILINT)
-$(GOLANGCILINT):
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint
-.PHONY: $(GOREPORTCARDCLI)
-$(GOREPORTCARDCLI):
-	go install github.com/gojp/goreportcard/cmd/goreportcard-cli
-.PHONY: $(GOMETALINTER)
-$(GOMETALINTER):
-	curl -L https://git.io/vp6lP | bash -s -- -b $(GOBIN)
 
 .PHONY: build
 build: clean
@@ -55,9 +41,6 @@ check:
 		-E unparam \
 		-E dupl
 	goreportcard-cli -v -t 90
-
-.PHONY: setup
-setup: $(GOIMPORTS) $(GOLANGCILINT) $(GOREPORTCARDCLI) $(GOMETALINTER)
 
 .PHONY: tmpl
 tmpl: 

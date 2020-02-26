@@ -23,6 +23,7 @@ phases:
 
   pre_build:
     commands:
+      - sam --version && cfn-lint --version
       - make tmpl check test
 
   build:
