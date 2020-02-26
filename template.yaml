@@ -11,7 +11,7 @@ Metadata:
           - IntervalUnit
           - Region
       - Label:
-          default: "Optional Parameters"
+          default: "Optional Parameters for Cross Account Configuration"
         Parameters:
           - CrossAccountRoleArn
           - CrossAccountRoleExternalID
