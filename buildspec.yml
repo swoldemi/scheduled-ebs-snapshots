@@ -28,7 +28,7 @@ phases:
 
   build:
     commands:
-      - make build sam-package
+      - make build && make sam-package
 
   post_build:
     commands:
