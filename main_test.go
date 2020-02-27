@@ -70,6 +70,9 @@ func TestHandler(t *testing.T) {
 	if err := os.Setenv("VOLUME_ID", "vol-test"); err != nil {
 		t.Fatalf("Error setting VOLUME_ID environment variable: %v\n", err)
 	}
+	if err := os.Setenv("VOLUME_REGION", "us-east-6"); err != nil {
+		t.Fatalf("Error setting VOLUME_ID environment variable: %v\n", err)
+	}
 	if err := os.Setenv("ROLE_ARN", "arn:aws:iam::123456789012:role/SampleRole"); err != nil {
 		t.Fatalf("Error setting ROLE_ARN environment variable: %v\n", err)
 	}
@@ -78,7 +81,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	volumeID := os.Getenv("VOLUME_ID")
-	description, err := lib.NewSnapshotDescription(volumeID, defaultEvent)
+	description, err := lib.NewSnapshotDescription(volumeID, os.Getenv("VOLUME_REGION"), defaultEvent)
 	if err != nil {
 		t.Fatalf("Error formatting snapshot description: %v\n", err)
 	}

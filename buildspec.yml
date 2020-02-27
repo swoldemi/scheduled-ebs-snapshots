@@ -32,4 +32,4 @@ phases:
 
   post_build:
     commands:
-      - make sam-publish
+      - chmod +x ./scripts/publish.sh && ./scripts/publish.sh

@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-xray-sdk-go/xray"
@@ -9,6 +12,13 @@ import (
 	"github.com/swoldemi/scheduled-ebs-snapshots/pkg/auth"
 	"github.com/swoldemi/scheduled-ebs-snapshots/pkg/lib"
 )
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return os.Getenv(fallback)
+}
 
 func main() {
 	log.Info("Starting Lambda in live environment")
@@ -19,7 +29,9 @@ func main() {
 	}
 
 	ec2Svc := ec2.New(sess)
+	ec2Svc.Client.Config.Region = aws.String(getEnv("VOLUME_REGION", "AWS_REGION"))
 	cwSvc := cloudwatch.New(sess)
+
 	if err := xray.Configure(xray.Config{LogLevel: "trace"}); err != nil {
 		log.Fatalf("Error configuring X-Ray: %v\n", err)
 		return

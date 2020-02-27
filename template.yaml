@@ -9,7 +9,8 @@ Metadata:
         Parameters:
           - Interval
           - IntervalUnit
-          - Region
+          - VolumeID
+          - VolumeRegion
       - Label:
           default: "Optional Parameters for Cross Account Configuration"
         Parameters:
@@ -25,7 +26,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ["scheduled", "ebs", "snapshots", "cross-account"]
     HomePageUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
-    SemanticVersion: 1.0.0
+    SemanticVersion: 1.1.0
     SourceCodeUrl: https://github.com/swoldemi/scheduled-ebs-snapshots
 
 Parameters:
@@ -34,14 +35,14 @@ Parameters:
     Description: Required. How often should the snapshot be taken?
   IntervalUnit:
     Type: String
-    Description: "Required. Using what unit of time will the snapshot be taken?"
+    Description: Required. Using what unit of time will the snapshot be taken? One of '["minute", "minutes", "hour", "hours", "day", "days"]'.
     AllowedValues: ["minute", "minutes", "hour", "hours", "day", "days"]
-  Region:
-    Type: String
-    Description: Required. The region in which the EBS volume to take a snapshot of exists.
   VolumeID:
     Type: String
-    Description: Optional. The ID of the EBS volume to take a snapshot of. Defaults to us-east-1
+    Description: Required. The ID of the EBS volume to take a snapshot of. Include 'vol-' prefix.
+  VolumeRegion:
+    Type: String
+    Description: Required. The region in which the EBS volume to take a snapshot of exists. Defaults to us-east-1.
     Default: us-east-1
   CrossAccountRoleArn:
     Type: String
@@ -119,7 +120,7 @@ Resources:
                   { "Ref": "AWS::NoValue" },
                 ],
             }
-          REGION: !Ref Region
+          VOLUME_REGION: !Ref VolumeRegion
       Role: !GetAtt ScheduledEBSSnapshotsExecutionRole.Arn
       Timeout: 15
 
