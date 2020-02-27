@@ -1,7 +1,7 @@
-GIT_BRANCH=`git symbolic-ref HEAD --short 2>/dev/null`
-if [ "$GIT_BRANCH" = X"master" ]
+echo "On branch `git branch | sed -n '/\* /s///p'`"
+if [ "`git branch | sed -n '/\* /s///p'`" = X"master" ]
 then 
     make sam-publish; 
 else
-    echo Skipping publish on branch $GIT_BRANCH
+    echo Skipping publish
 fi

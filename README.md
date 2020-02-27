@@ -16,6 +16,8 @@ This AWS Serverless Application Repository application aims to solve some of the
 3. Custom Amazon CloudWatch metrics to assist in managing snapshots across various accounts
 4. AWS X-Ray integration
 5. Free!
+>Architecture
+![scheduled-ebs-volumes-architecture](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.PNG)
 
 ## Usage
 Prerequisites:
@@ -96,13 +98,13 @@ Have an idea for a feature to enhance this serverless application? Open an [issu
 
 ### Screenshots
 >Example response latency percentiles as reported by X-Ray traces after ~200 events.
-![example-trace-response-time](./screenshots/example-trace-response-time.PNG)
+![example-trace-response-time](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/example-trace-response-time.PNG)
 
 >Example CloudWatch Service Map Dashboard for this Lambda function.
-![service-map-dashboard](./screenshots/service-map-dashboard.PNG)
+![service-map-dashboard](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/service-map-dashboard.PNG)
 
 >Custom cloudwatch metric reporting the Snapshot count with dimensions for where they came from and where they went.
-![example-metrics-screenshot](./screenshots/example-metrics-screenshot.PNG)
+![example-metrics-screenshot](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/example-metrics-screenshot.PNG)
 
 ### Development
 This application has been developed, built, and testing against [Go 1.13, Go 1.14](https://golang.org/dl/), the latest version of the [Serverless Application Model CLI](https://github.com/awslabs/aws-sam-cli), and the latest version of the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html). A [Makefile](./Makefile) has been provided for convenience.
