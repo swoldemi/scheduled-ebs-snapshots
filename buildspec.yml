@@ -32,4 +32,4 @@ phases:
 
   post_build:
     commands:
-      - env
+      - chmod +x ./scripts/publish.sh && ./scripts/publish.sh

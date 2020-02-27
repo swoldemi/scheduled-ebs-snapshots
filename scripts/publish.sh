@@ -1,5 +1,5 @@
-echo "On branch `git branch | sed -n '/\* /s///p'`"
-if [ "`git branch | sed -n '/\* /s///p'`" = X"master" ]
+echo "On branch `basename $CODEBUILD_WEBHOOK_HEAD_REF`"
+if [ "basename $CODEBUILD_WEBHOOK_HEAD_REF" = X"master" ]
 then 
     make sam-publish; 
 else
