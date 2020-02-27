@@ -1,5 +1,5 @@
 GIT_BRANCH=`git symbolic-ref HEAD --short 2>/dev/null`
-if [ $GIT_BRANCH == "master" ]
+if [ "$GIT_BRANCH" = X"master" ]
 then 
     make sam-publish; 
 else
