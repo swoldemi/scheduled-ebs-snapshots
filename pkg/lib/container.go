@@ -17,7 +17,7 @@ var (
 	// ErrInvalidVolumeID is returned when a Lambda is created without providing an EBS volume ID.
 	ErrInvalidVolumeID = errors.New("must provide volume ID")
 
-	// ErrInvalidVolumePrefix is rturned when a Lambda is provided with an
+	// ErrInvalidVolumePrefix is returned when a Lambda is provided with an
 	// EBS volume ID that does not begin with the 'vol-' prefix.
 	ErrInvalidVolumePrefix = errors.New("volume ID must begin with 'vol-' prefix")
 )

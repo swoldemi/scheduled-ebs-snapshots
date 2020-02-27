@@ -61,7 +61,7 @@ sam-deploy:
 
 .PHONY: sam-publish
 sam-publish:
-		sam publish --region us-east-1 --template packaged.yaml
+	sam publish --region us-east-1 --template packaged.yaml
 
 .PHONY: stack-describe 
 stack-describe:

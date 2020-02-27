@@ -17,8 +17,7 @@ This AWS Serverless Application Repository application aims to solve some of the
 4. AWS X-Ray integration
 5. Free!
 
-
-<p align="center"><img alt="scheduled-ebs-volumes-architecture" src="https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png"/></p>
+![architecture][https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png]
 
 ## Usage
 Prerequisites:
@@ -98,7 +97,7 @@ After your specified interval and interval unit (example: 5 minutes), a CloudWat
 Have an idea for a feature to enhance this serverless application? Open an [issue](https://github.com/swoldemi/scheduled-ebs-snapshots/issues) or [pull request](https://github.com/swoldemi/scheduled-ebs-snapshots/pulls)!
 
 ### Screenshots
->Example response latency percentiles as reported by X-Ray traces after ~200 events.
+>Example response latency percentiles as reported by X-Ray traces after ~350 events.
 ![example-trace-response-time](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/example-trace-response-time.PNG)
 
 >Example CloudWatch Service Map Dashboard for this Lambda function.
