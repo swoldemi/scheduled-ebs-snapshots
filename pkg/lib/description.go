@@ -21,11 +21,12 @@ type SnapshotDescription struct {
 	SourceAccount      string
 	Timestamp          string
 	VolumeID           string
+	VolumeRegion       string
 }
 
 // NewSnapshotDescription returns the description for an EBS volume snapshot,
 // using the ID of the volume and the CloudWatch event that triggered the snapshot.
-func NewSnapshotDescription(volumeID string, event events.CloudWatchEvent) (*SnapshotDescription, error) {
+func NewSnapshotDescription(volumeID, volumeRegion string, event events.CloudWatchEvent) (*SnapshotDescription, error) {
 	var dstAcc string
 
 	role := os.Getenv("ROLE_ARN")
@@ -46,14 +47,16 @@ func NewSnapshotDescription(volumeID string, event events.CloudWatchEvent) (*Sna
 		SourceAccount:      event.AccountID,
 		Timestamp:          event.Time.UTC().Format(time.RFC1123),
 		VolumeID:           volumeID,
+		VolumeRegion:       volumeRegion,
 	}, nil
 }
 
 // String returns a string formatting of the current SnapshotDescription.
 func (s *SnapshotDescription) String() string {
-	return fmt.Sprintf(`Snapshot of volume %s at %s. Source account: %s. Destination Account: %s`,
+	return fmt.Sprintf(`Snapshot of volume %s at %s in region %s. Source account: %s. Destination Account: %s`,
 		s.VolumeID,
 		s.Timestamp,
+		s.VolumeRegion,
 		s.SourceAccount,
 		s.DestinationAccount,
 	)
@@ -84,12 +87,16 @@ func (s *SnapshotDescription) CreateSnapshotInput() *ec2.CreateSnapshotInput {
 }
 
 // PutMetricDataInput returns the input for PutSnapshotMetric.
-// Metric dimensions: SourceAccountID, DestinationAccountID, VolumeID.
+// Metric dimensions: VolumeRegion, SourceAccountID, DestinationAccountID, VolumeID.
 func (s *SnapshotDescription) PutMetricDataInput() *cloudwatch.PutMetricDataInput {
 	dimensions := []*cloudwatch.Dimension{
 		{
 			Name:  aws.String("SourceAccountID"),
 			Value: aws.String(s.SourceAccount),
+		},
+		{
+			Name:  aws.String("VolumeRegion"),
+			Value: aws.String(s.VolumeRegion),
 		},
 		{
 			Name:  aws.String("DestinationAccountID"),

@@ -71,10 +71,7 @@ func AssumeCrossAccountRole(sess *session.Session, role *CrossAccountRole) (*ses
 // NewSessionFromEnvironment is a helper for creating a session using
 // configuration stored within the environment.
 func NewSessionFromEnvironment() (*session.Session, error) {
-	region := os.Getenv("REGION")
-	if region == "" {
-		region = "us-east-1"
-	}
+	region := os.Getenv("AWS_REGION")
 	log.Infof("Creating session within region: %s\n", region)
 	sess, err := session.NewSessionWithOptions(
 		session.Options{

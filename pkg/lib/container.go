@@ -65,7 +65,7 @@ func (f *FunctionContainer) GetHandler() (func(context.Context, events.CloudWatc
 	return func(ctx context.Context, event events.CloudWatchEvent) error {
 		log.Infof("Received event at %s for volume %s\n", event.Time.UTC(), volumeID)
 
-		description, err := NewSnapshotDescription(volumeID, event)
+		description, err := NewSnapshotDescription(volumeID, os.Getenv("VOLUME_REGION"), event)
 		if err != nil {
 			log.Errorf("Error constructing SnapshotDescription: %v\n", err)
 			return err
