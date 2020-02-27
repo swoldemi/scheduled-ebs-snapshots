@@ -16,8 +16,9 @@ This AWS Serverless Application Repository application aims to solve some of the
 3. Custom Amazon CloudWatch metrics to assist in managing snapshots across various accounts
 4. AWS X-Ray integration
 5. Free!
->Architecture diagram:
-![scheduled-ebs-volumes-architecture](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png)
+
+
+<p align="center"><img alt="scheduled-ebs-volumes-architecture" src="https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png"/></p>
 
 ## Usage
 Prerequisites:
