@@ -15,7 +15,8 @@ This AWS Serverless Application Repository application aims to solve some of the
 2. Cross-account snapshot support
 3. Custom Amazon CloudWatch metrics to assist in managing snapshots across various accounts
 4. AWS X-Ray integration
-5. Free!
+5. Automated merging of volume tags to volume snapshots
+6. Free!
 
 ![architecture][https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png]
 
@@ -76,7 +77,8 @@ If the target EBS volume exists within a different account, create a third-party
             "Effect": "Allow",
             "Action": [
                 "ec2:CreateSnapshot", 
-                "ec2:CreateTags"
+                "ec2:CreateTags",
+                "ec2:DescribeVolumes"
             ],
             "Resource": "*"
         }
