@@ -36,6 +36,14 @@ func (_m *mockEC2Client) CreateSnapshotWithContext(ctx aws.Context, input *ec2.C
 	return args.Get(0).(*ec2.Snapshot), args.Error(1)
 }
 
+// DescribeVolumesWithContext DescribeVolumesWithContext the CreateSnapshot EC2 API endpoint.
+func (_m *mockEC2Client) DescribeVolumesWithContext(ctx aws.Context, input *ec2.DescribeVolumesInput, opts ...request.Option) (*ec2.DescribeVolumesOutput, error) {
+	log.Debugf("Mocking DescribeVolumesWithContext API with filters: %v\n", input.Filters)
+	args := _m.Called(ctx, input)
+	output := &ec2.DescribeVolumesOutput{Volumes: []*ec2.Volume{{VolumeId: input.Filters[0].Values[0]}}}
+	return output, args.Error(1)
+}
+
 // CreateSnapshot mocks the PutMetricData CloudWatch API endpoint.
 func (_m *mockCWClient) PutMetricDataWithContext(ctx aws.Context, input *cloudwatch.PutMetricDataInput, opts ...request.Option) (*cloudwatch.PutMetricDataOutput, error) {
 	log.Debugf("Mocking PutMetricData API with input: %s\n", input.String())
@@ -86,9 +94,14 @@ func TestHandler(t *testing.T) {
 		t.Fatalf("Error formatting snapshot description: %v\n", err)
 	}
 
+	snapIn := description.CreateSnapshotInput()
 	ec2Svc := new(mockEC2Client)
-	ec2Svc.On("CreateSnapshotWithContext", context.Background(), description.CreateSnapshotInput()).
-		Return(&ec2.Snapshot{}, nil)
+	ec2Svc.On("CreateSnapshotWithContext", context.Background(), snapIn).Return(&ec2.Snapshot{}, nil)
+	ec2Svc.On("DescribeVolumesWithContext", context.Background(), &ec2.DescribeVolumesInput{
+		Filters: []*ec2.Filter{
+			{Name: aws.String("volume-id"), Values: []*string{snapIn.VolumeId}},
+		},
+	}).Return(&ec2.DescribeVolumesOutput{Volumes: []*ec2.Volume{{VolumeId: snapIn.VolumeId}}}, nil)
 
 	cwSvc := new(mockCWClient)
 	cwSvc.On("PutMetricDataWithContext", context.Background(), description.PutMetricDataInput()).
