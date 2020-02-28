@@ -18,7 +18,7 @@ This AWS Serverless Application Repository application aims to solve some of the
 5. Automated merging of volume tags to volume snapshots
 6. Free!
 
-![architecture][https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png]
+![architecture](https://raw.githubusercontent.com/swoldemi/scheduled-ebs-snapshots/master/screenshots/architecture.png)
 
 ## Usage
 Prerequisites:
