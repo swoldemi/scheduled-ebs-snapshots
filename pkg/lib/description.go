@@ -69,7 +69,7 @@ func (s *SnapshotDescription) CreateSnapshotInput() *ec2.CreateSnapshotInput {
 		Description: aws.String(s.String()),
 		TagSpecifications: []*ec2.TagSpecification{
 			{
-				ResourceType: aws.String("snapshot"),
+				ResourceType: aws.String(ec2.ResourceTypeSnapshot),
 				Tags: []*ec2.Tag{
 					{
 						Key:   aws.String("timestamp"),
