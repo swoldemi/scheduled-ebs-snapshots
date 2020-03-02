@@ -13,11 +13,11 @@ import (
 	"github.com/swoldemi/scheduled-ebs-snapshots/pkg/lib"
 )
 
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
+func getVolumeRegion() *string {
+	if value, ok := os.LookupEnv("VOLUME_REGION"); ok {
+		return aws.String(value)
 	}
-	return os.Getenv(fallback)
+	return aws.String(os.Getenv("AWS_REGION"))
 }
 
 func main() {
@@ -28,8 +28,7 @@ func main() {
 		return
 	}
 
-	ec2Svc := ec2.New(sess)
-	ec2Svc.Client.Config.Region = aws.String(getEnv("VOLUME_REGION", "AWS_REGION"))
+	ec2Svc := ec2.New(sess, &aws.Config{Region: getVolumeRegion()})
 	cwSvc := cloudwatch.New(sess)
 
 	if err := xray.Configure(xray.Config{LogLevel: "trace"}); err != nil {

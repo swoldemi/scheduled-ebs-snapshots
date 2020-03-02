@@ -1,4 +1,4 @@
-// Package lib contains library units for the scheduled-ebs-snapshot Lambda function.
+// Package lib contains library units for the scheduled-ebs-snapshots Lambda function.
 package lib
 
 import (

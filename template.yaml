@@ -145,5 +145,5 @@ Resources:
 
 Outputs:
   LambdaFunctionArn:
-    Description: ScheduledEBSSnapshots Lambda Function ARN
+    Description: scheduled-ebs-snapshots Lambda Function ARN
     Value: !GetAtt ScheduledEBSSnapshotsFunction.Arn
