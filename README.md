@@ -1,4 +1,4 @@
-![](https://codebuild.us-east-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiYTJIcFJ2d1NiNnNTYUs4VEFGNVlQbzhOdXF1aWcrdHhKdXVwR2h5SjRONVBDMmtnRXFlRmF5NFAwN1dIdUFGcWc1RHlOSjMra3YvZFlqeGNZbSszSVlzPSIsIml2UGFyYW1ldGVyU3BlYyI6InhDL1JTOW9wWC9QWUw0ZDAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![](https://codebuild.us-east-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiQWVNblZuZk8zRFR0Z0xlSTJkNnM4ZkovRGVUYjNnVGU5TGdXSUFuam9WbDR0YURGTmwyV3V5MDltd2l4a2ZwN0p1dk96VFN5Unhhd0x5T3JuTEJMVEs0PSIsIml2UGFyYW1ldGVyU3BlYyI6IkpETGQvMWVjRHFTWEZVU0kiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 [![][sar-logo]](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:273450712882:applications~scheduled-ebs-snapshots)
 
 
@@ -52,8 +52,6 @@ To deploy this function from AWS GovCloud or regions in China, you must have an 
 |**EU (Stockholm) (eu-north-1)**               |[![][sar-deploy]](https://deploy.serverlessrepo.app/eu-north-1/?app=arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots)    |
 |**Middle East (Bahrain) (me-south-1)**        |[![][sar-deploy]](https://deploy.serverlessrepo.app/me-south-1/?app=arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots)    |
 |**South America (Sao Paulo) (sa-east-1)**     |[![][sar-deploy]](https://deploy.serverlessrepo.app/sa-east-1/?app=arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots)     |
-|**AWS GovCloud (US-East) (us-gov-east-1)**    |[![][sar-deploy]](https://deploy.serverlessrepo.app/us-gov-east-1/?app=arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots) |
-|**AWS GovCloud (US-West) (us-gov-west-1)**    |[![][sar-deploy]](https://deploy.serverlessrepo.app/us-gov-west-1/?app=arn:aws:serverlessrepo:us-east-1:273450712882:applications/scheduled-ebs-snapshots) |
 
 ### Configuration
 Example parameter values:

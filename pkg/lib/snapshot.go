@@ -14,6 +14,7 @@ import (
 
 const maxTagsPerResource = 50
 
+// ErrVolumeNotFound ...
 var ErrVolumeNotFound = errors.New("unable to find volume")
 
 // InvokeSnapshot sets up and creates a snapshot of the given EBS volume.
