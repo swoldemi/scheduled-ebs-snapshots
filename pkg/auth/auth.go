@@ -4,6 +4,7 @@ package auth
 import (
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -35,7 +36,7 @@ func (c *CrossAccountRole) Validate() error {
 	if err != nil {
 		return err
 	}
-	if role.Resource != "role" {
+	if strings.Split(role.Resource, "/")[0] != "role" {
 		return ErrInvalidRoleARN
 	}
 	if c.ExternalID == "" {
